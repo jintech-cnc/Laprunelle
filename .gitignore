@@ -7,6 +7,7 @@ venv/
 ENV/
 env/
 .env
+RENDER_VARIABLES.txt
 
 # Django
 db.sqlite3
