@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer un article - La prunelle{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-16 text-center">
+    <h1 class="text-2xl font-serif font-bold mb-4">Supprimer cet article ?</h1>
+    <p class="text-gray-600 mb-8">Vous êtes sur le point de supprimer définitivement <strong>« {{ product.name }} »</strong>. Cette action est irréversible.</p>
+
+    <form method="post" class="flex flex-col sm:flex-row gap-3 justify-center">
+        {% csrf_token %}
+        <a href="{% url 'manage_products' %}" class="px-6 py-3 rounded-md border border-gray-200 hover:bg-gray-50 transition font-medium">Annuler</a>
+        <button type="submit" class="px-6 py-3 rounded-md bg-red-600 text-white hover:bg-red-700 transition font-bold uppercase tracking-widest text-sm">
+            Oui, supprimer
+        </button>
+    </form>
+</div>
+{% endblock %}

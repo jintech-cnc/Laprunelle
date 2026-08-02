@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Inscription - La prunelle{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-16">
+    <h1 class="text-3xl font-serif font-bold mb-8 text-center">Créer un compte</h1>
+
+    <div class="bg-gray-50 p-8 rounded-lg">
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <p class="text-xs text-gray-400 mt-1">{{ field.help_text|safe }}</p>
+                    {% endif %}
+                    {% if field.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="w-full bg-black text-white py-3 mt-4 rounded-md hover:bg-gray-800 transition font-bold uppercase tracking-widest">
+                Créer mon compte
+            </button>
+        </form>
+        <p class="text-sm text-gray-500 text-center mt-6">
+            Déjà inscrit(e) ?
+            <a href="{% url 'login' %}" class="text-amber-700 font-medium hover:underline">Connectez-vous</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

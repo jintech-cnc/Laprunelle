@@ -1,0 +1,62 @@
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from .models import Product
+
+INPUT_CLASS = 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none'
+
+
+class RegisterForm(UserCreationForm):
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': INPUT_CLASS}))
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            field.widget.attrs.setdefault('class', INPUT_CLASS)
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(label="Nom d'utilisateur", widget=forms.TextInput(attrs={'class': INPUT_CLASS}))
+    password = forms.CharField(label="Mot de passe", widget=forms.PasswordInput(attrs={'class': INPUT_CLASS}))
+
+
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        # Le champ "slug" est retiré du formulaire : il est généré
+        # automatiquement à partir du nom de l'article (voir Product.save()).
+        fields = [
+            'name', 'category', 'description', 'price',
+            'image_url', 'is_new', 'is_popular', 'is_on_sale',
+            'discount_percentage', 'sizes'
+        ]
+        labels = {
+            'name': "Nom de l'article",
+            'category': "Catégorie",
+            'description': "Description",
+            'price': "Prix (€)",
+            'image_url': "Lien de la photo",
+            'is_new': "Nouveauté",
+            'is_popular': "Coup de cœur",
+            'is_on_sale': "En promotion",
+            'discount_percentage': "Réduction (%)",
+            'sizes': "Tailles disponibles",
+        }
+        help_texts = {
+            'image_url': "Collez ici le lien (URL) d'une photo trouvée en ligne ou hébergée sur un service d'images.",
+            'sizes': "Séparez les tailles par une virgule, par exemple : XS,S,M,L,XL",
+            'discount_percentage': "Uniquement utile si \"En promotion\" est coché.",
+        }
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none', 'placeholder': 'Ex : Robe Été Fleurie'}),
+            'category': forms.Select(attrs={'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none', 'placeholder': "Décrivez l'article en quelques phrases"}),
+            'price': forms.NumberInput(attrs={'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none', 'placeholder': '0.00'}),
+            'image_url': forms.URLInput(attrs={'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none', 'placeholder': 'https://...'}),
+            'discount_percentage': forms.NumberInput(attrs={'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none'}),
+            'sizes': forms.TextInput(attrs={'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none', 'placeholder': 'XS,S,M,L,XL'}),
+        }

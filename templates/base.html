@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}La prunelle E-boutique - Mode & Élégance{% endblock %}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-serif { font-family: 'Playfair Display', serif; }
+        [x-cloak] { display: none !important; }
+        
+        .luxury-gradient {
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+        }
+        .btn-luxury {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-luxury:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900" x-data="cartSystem()" x-cloak>
+
+    <!-- Header / Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="{% url 'home' %}" class="text-2xl font-serif font-bold tracking-tighter text-black uppercase">
+                        La prunelle
+                    </a>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-10 items-center">
+                    <a href="{% url 'home' %}#boutique" class="text-sm font-medium hover:text-amber-700 transition">Collections</a>
+                    <a href="{% url 'home' %}?filtre=nouveautes#boutique" class="text-sm font-medium hover:text-amber-700 transition">Nouveautés</a>
+                    <a href="{% url 'about' %}" class="text-sm font-medium hover:text-amber-700 transition">À propos</a>
+                    {% if user.is_superuser %}
+                        <a href="{% url 'manage_products' %}" class="text-sm font-bold text-amber-800 hover:text-black transition">Gérer la boutique</a>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="text-sm font-medium text-gray-500 hover:text-black transition">Déconnexion</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-sm font-medium hover:text-amber-700 transition">Connexion</a>
+                        <a href="{% url 'register' %}" class="text-sm font-bold text-amber-800 hover:text-black transition">Inscription</a>
+                    {% endif %}
+                </div>
+
+                <!-- Action Icons -->
+                <div class="flex items-center space-x-4 sm:space-x-6">
+                    <div class="relative hidden sm:block" @click.away="searchOpen = false">
+                        <button @click="searchOpen = !searchOpen" class="text-gray-500 hover:text-black transition">
+                            <i class="fa-solid fa-magnifying-glass text-xl"></i>
+                        </button>
+                        <div x-show="searchOpen" x-cloak
+                             x-transition
+                             class="absolute right-0 mt-3 w-64 bg-white shadow-lg border border-gray-100 rounded-md p-2">
+                            <input type="text" x-model="searchQuery" x-ref="searchInput"
+                                   @keyup.escape="searchOpen = false"
+                                   x-init="$watch('searchOpen', v => v && setTimeout(() => $refs.searchInput.focus(), 50))"
+                                   placeholder="Rechercher un article..."
+                                   class="w-full px-3 py-2 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-black">
+                        </div>
+                    </div>
+                    <button @click="cartOpen = true" class="relative group">
+                        <i class="fa-solid fa-bag-shopping text-2xl text-gray-800 group-hover:text-black transition"></i>
+                        <span x-show="cartCount > 0" 
+                              x-text="cartCount"
+                              class="absolute -top-2 -right-2 bg-amber-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center justify-center min-w-[18px]">
+                        </span>
+                    </button>
+                    <!-- Mobile Menu Button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-gray-800">
+                        <i class="fa-solid text-2xl" :class="mobileMenuOpen ? 'fa-xmark' : 'fa-bars'"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu Panel -->
+            <div x-show="mobileMenuOpen" x-cloak
+                 x-transition
+                 class="md:hidden border-t border-gray-100 py-4 space-y-1">
+                <a href="{% url 'home' %}#boutique" class="block px-2 py-3 text-sm font-medium hover:text-amber-700 transition">Collections</a>
+                <a href="{% url 'home' %}?filtre=nouveautes#boutique" class="block px-2 py-3 text-sm font-medium hover:text-amber-700 transition">Nouveautés</a>
+                <a href="{% url 'about' %}" class="block px-2 py-3 text-sm font-medium hover:text-amber-700 transition">À propos</a>
+                <input type="text" x-model="searchQuery" placeholder="Rechercher un article..."
+                       class="w-full mt-2 px-3 py-2 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-black">
+                {% if user.is_superuser %}
+                    <a href="{% url 'manage_products' %}" class="block px-2 py-3 text-sm font-bold text-amber-800">Gérer la boutique</a>
+                {% endif %}
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="block px-2 py-3 text-sm font-medium text-gray-500">Déconnexion</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="block px-2 py-3 text-sm font-medium hover:text-amber-700 transition">Connexion</a>
+                    <a href="{% url 'register' %}" class="block px-2 py-3 text-sm font-bold text-amber-800">Inscription</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 space-y-2">
+        {% for message in messages %}
+        <div class="rounded-md px-4 py-3 text-sm font-medium {% if message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-amber-50 text-amber-800 border border-amber-200{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Slide-over Cart Panel -->
+    <div x-show="cartOpen" class="relative z-[60]" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+        <div x-show="cartOpen" 
+             x-transition:enter="ease-in-out duration-500" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="ease-in-out duration-500" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="cartOpen = false"></div>
+
+        <div class="fixed inset-0 overflow-hidden">
+            <div class="absolute inset-0 overflow-hidden">
+                <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+                    <div x-show="cartOpen" 
+                         x-transition:enter="transform transition ease-in-out duration-500 sm:duration-700" 
+                         x-transition:enter-start="translate-x-full" 
+                         x-transition:enter-end="translate-x-0" 
+                         x-transition:leave="transform transition ease-in-out duration-500 sm:duration-700" 
+                         x-transition:leave-start="translate-x-0" 
+                         x-transition:leave-end="translate-x-full" 
+                         class="pointer-events-auto w-screen max-w-md" @click.away="cartOpen = false">
+                        <div class="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
+                            <div class="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+                                <div class="flex items-start justify-between">
+                                    <h2 class="text-lg font-serif font-bold text-gray-900" id="slide-over-title">Votre Panier</h2>
+                                    <div class="ml-3 flex h-7 items-center">
+                                        <button type="button" class="relative -m-2 p-2 text-gray-400 hover:text-gray-500" @click="cartOpen = false">
+                                            <i class="fa-solid fa-xmark text-xl"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="mt-8">
+                                    <div class="flow-root">
+                                        <template x-if="cartItems.length === 0">
+                                            <div class="text-center py-12">
+                                                <i class="fa-solid fa-bag-shopping text-5xl text-gray-200 mb-4 block"></i>
+                                                <p class="text-gray-500">Votre panier est vide</p>
+                                            </div>
+                                        </template>
+                                        <ul role="list" class="-my-6 divide-y divide-gray-200">
+                                            <template x-for="item in cartItems" :key="item.id">
+                                                <li class="flex py-6">
+                                                    <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                                                        <img :src="item.image" :alt="item.name" class="h-full w-full object-cover object-center">
+                                                    </div>
+                                                    <div class="ml-4 flex flex-1 flex-col">
+                                                        <div>
+                                                            <div class="flex justify-between text-base font-medium text-gray-900">
+                                                                <h3 x-text="item.name"></h3>
+                                                                <p class="ml-4" x-text="(item.price * item.quantity).toFixed(2) + ' €'"></p>
+                                                            </div>
+                                                            <p class="mt-1 text-sm text-gray-500" x-text="item.category"></p>
+                                                        </div>
+                                                        <div class="flex flex-1 items-end justify-between text-sm">
+                                                            <div class="flex items-center border rounded-md border-gray-200">
+                                                                <button @click="updateQty(item.id, -1)" class="px-2 py-1 hover:bg-gray-50 text-gray-600">-</button>
+                                                                <span class="px-2 py-1 text-gray-900 font-medium" x-text="item.quantity"></span>
+                                                                <button @click="updateQty(item.id, 1)" class="px-2 py-1 hover:bg-gray-50 text-gray-600">+</button>
+                                                            </div>
+                                                            <div class="flex">
+                                                                <button type="button" @click="removeItem(item.id)" class="font-medium text-amber-700 hover:text-amber-600">Supprimer</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-gray-200 px-4 py-6 sm:px-6">
+                                <div class="flex justify-between text-base font-bold text-gray-900">
+                                    <p>Sous-total</p>
+                                    <p x-text="cartTotal.toFixed(2) + ' €'"></p>
+                                </div>
+                                <p class="mt-0.5 text-sm text-gray-500">Livraison calculée lors du paiement.</p>
+                                <div class="mt-6">
+                                    <a :href="checkoutLink" target="_blank"
+                                       :class="cartItems.length === 0 ? 'opacity-40 pointer-events-none' : ''"
+                                       class="flex items-center justify-center rounded-md border border-transparent bg-black px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-gray-800 transition uppercase tracking-widest">
+                                        <i class="fa-brands fa-whatsapp mr-2 text-lg"></i> Commander via WhatsApp
+                                    </a>
+                                </div>
+                                <div class="mt-6 flex justify-center text-center text-sm text-gray-500">
+                                    <p>ou <button type="button" class="font-medium text-amber-700 hover:text-amber-600" @click="cartOpen = false">Continuer vos achats &rarr;</button></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-50 border-t border-gray-100 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                <div class="col-span-1 md:col-span-2">
+                    <h3 class="text-xl font-serif font-bold mb-6 uppercase tracking-tighter">La prunelle</h3>
+                    <p class="text-gray-500 max-w-sm mb-6">Redéfinissez votre élégance au quotidien avec nos collections exclusives et intemporelles.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-black transition"><i class="fa-brands fa-instagram text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-black transition"><i class="fa-brands fa-facebook text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-black transition"><i class="fa-brands fa-tiktok text-xl"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-6 text-sm uppercase tracking-widest">Boutique</h4>
+                    <ul class="space-y-4 text-sm text-gray-600">
+                        <li><a href="{% url 'home' %}#boutique" class="hover:text-black transition">Collections</a></li>
+                        <li><a href="{% url 'home' %}#boutique" class="hover:text-black transition">Hommes</a></li>
+                        <li><a href="{% url 'home' %}#boutique" class="hover:text-black transition">Femmes</a></li>
+                        <li><a href="{% url 'home' %}#boutique" class="hover:text-black transition">Accessoires</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-6 text-sm uppercase tracking-widest">Support</h4>
+                    <ul class="space-y-4 text-sm text-gray-600">
+                        <li><a href="{% url 'shipping' %}" class="hover:text-black transition">Livraison & Retours</a></li>
+                        <li><a href="{% url 'faq' %}" class="hover:text-black transition">FAQ</a></li>
+                        <li><a href="{% url 'contact' %}" class="hover:text-black transition">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-12 pt-8 border-t border-gray-200 text-center text-xs text-gray-400">
+                &copy; 2026 La prunelle E-boutique. Tous droits réservés. <a href="{% url 'register' %}" class="hover:underline">Inscription</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alpine.js Global Store -->
+    <script>
+        // Numéro WhatsApp de la boutique (format international, sans le +).
+        // À remplacer par le vrai numéro de La prunelle.
+        const WHATSAPP_NUMBER = '243000000000';
+
+        function cartSystem() {
+            return {
+                cartOpen: false,
+                mobileMenuOpen: false,
+                searchOpen: false,
+                searchQuery: '',
+                cartItems: [],
+                selectedProduct: null,
+                modalOpen: false,
+                
+                get cartCount() {
+                    return this.cartItems.reduce((acc, item) => acc + item.quantity, 0);
+                },
+                
+                get cartTotal() {
+                    return this.cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+                },
+
+                get checkoutLink() {
+                    if (this.cartItems.length === 0) return '#';
+                    let lines = ['Bonjour La prunelle, je souhaite commander :'];
+                    this.cartItems.forEach(item => {
+                        lines.push(`- ${item.name} x${item.quantity} (${(item.price * item.quantity).toFixed(2)} €)`);
+                    });
+                    lines.push(`Total : ${this.cartTotal.toFixed(2)} €`);
+                    const text = encodeURIComponent(lines.join('\n'));
+                    return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+                },
+                
+                addToCart(product) {
+                    const existing = this.cartItems.find(i => i.id === product.id);
+                    if (existing) {
+                        existing.quantity++;
+                    } else {
+                        this.cartItems.push({...product, quantity: 1});
+                    }
+                    this.cartOpen = true;
+                },
+                
+                updateQty(id, delta) {
+                    const item = this.cartItems.find(i => i.id === id);
+                    if (item) {
+                        item.quantity += delta;
+                        if (item.quantity <= 0) {
+                            this.removeItem(id);
+                        }
+                    }
+                },
+                
+                removeItem(id) {
+                    this.cartItems = this.cartItems.filter(i => i.id !== id);
+                },
+                
+                openProductModal(product) {
+                    this.selectedProduct = product;
+                    this.modalOpen = true;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

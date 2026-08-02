@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Gérer la boutique - La prunelle{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-16">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
+        <h1 class="text-3xl font-serif font-bold">Gérer la boutique</h1>
+        <a href="{% url 'add_product' %}" class="inline-flex items-center justify-center bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 transition font-bold uppercase tracking-widest text-sm">
+            <i class="fa-solid fa-plus mr-2"></i> Ajouter un article
+        </a>
+    </div>
+
+    {% if products %}
+    <div class="space-y-3">
+        {% for product in products %}
+        <div class="flex items-center gap-4 bg-gray-50 rounded-lg p-3 sm:p-4">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-16 h-16 object-cover rounded-md flex-shrink-0 bg-gray-200">
+            <div class="flex-1 min-w-0">
+                <p class="font-medium truncate">{{ product.name }}</p>
+                <p class="text-xs text-gray-500">
+                    {{ product.category.name }} · {{ product.price }} €
+                    {% if product.is_on_sale %}<span class="text-amber-700">· -{{ product.discount_percentage }}%</span>{% endif %}
+                    {% if product.is_new %}<span class="text-green-700">· Nouveauté</span>{% endif %}
+                </p>
+            </div>
+            <a href="{% url 'edit_product' product.pk %}" class="text-sm font-medium px-3 py-2 rounded-md hover:bg-gray-200 transition whitespace-nowrap">
+                <i class="fa-solid fa-pen mr-1"></i> Modifier
+            </a>
+            <form method="post" action="{% url 'delete_product' product.pk %}"
+                  onsubmit="return confirm('Supprimer définitivement « {{ product.name }} » ?');">
+                {% csrf_token %}
+                <button type="submit" class="text-sm font-medium text-red-600 px-3 py-2 rounded-md hover:bg-red-50 transition whitespace-nowrap">
+                    <i class="fa-solid fa-trash mr-1"></i> Supprimer
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-gray-400 py-16">Aucun article publié pour le moment. Cliquez sur "Ajouter un article" pour commencer.</p>
+    {% endif %}
+</div>
+{% endblock %}
