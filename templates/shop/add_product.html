@@ -12,7 +12,7 @@
     </h1>
 
     <div class="bg-gray-50 p-8 rounded-lg">
-        <form method="post" class="space-y-5">
+        <form method="post" enctype="multipart/form-data" class="space-y-5">
             {% csrf_token %}
             {% for field in form %}
                 {% if field.field.widget.input_type == 'checkbox' %}

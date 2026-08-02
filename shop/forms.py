@@ -31,7 +31,7 @@ class ProductForm(forms.ModelForm):
         # automatiquement à partir du nom de l'article (voir Product.save()).
         fields = [
             'name', 'category', 'description', 'price',
-            'image_url', 'is_new', 'is_popular', 'is_on_sale',
+            'image', 'image_url', 'is_new', 'is_popular', 'is_on_sale',
             'discount_percentage', 'sizes'
         ]
         labels = {
@@ -39,7 +39,8 @@ class ProductForm(forms.ModelForm):
             'category': "Catégorie",
             'description': "Description",
             'price': "Prix (€)",
-            'image_url': "Lien de la photo",
+            'image': "Photo (Upload local)",
+            'image_url': "Ou lien photo externe",
             'is_new': "Nouveauté",
             'is_popular': "Coup de cœur",
             'is_on_sale': "En promotion",
@@ -47,16 +48,18 @@ class ProductForm(forms.ModelForm):
             'sizes': "Tailles disponibles",
         }
         help_texts = {
-            'image_url': "Collez ici le lien (URL) d'une photo trouvée en ligne ou hébergée sur un service d'images.",
+            'image': "Sélectionnez une photo depuis votre appareil.",
+            'image_url': "Ou collez un lien URL externe.",
             'sizes': "Séparez les tailles par une virgule, par exemple : XS,S,M,L,XL",
             'discount_percentage': "Uniquement utile si \"En promotion\" est coché.",
         }
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none', 'placeholder': 'Ex : Robe Été Fleurie'}),
-            'category': forms.Select(attrs={'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none'}),
-            'description': forms.Textarea(attrs={'rows': 3, 'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none', 'placeholder': "Décrivez l'article en quelques phrases"}),
-            'price': forms.NumberInput(attrs={'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none', 'placeholder': '0.00'}),
-            'image_url': forms.URLInput(attrs={'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none', 'placeholder': 'https://...'}),
-            'discount_percentage': forms.NumberInput(attrs={'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none'}),
-            'sizes': forms.TextInput(attrs={'class': 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none', 'placeholder': 'XS,S,M,L,XL'}),
+            'name': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Ex : Robe Été Fleurie'}),
+            'category': forms.Select(attrs={'class': INPUT_CLASS}),
+            'description': forms.Textarea(attrs={'rows': 3, 'class': INPUT_CLASS, 'placeholder': "Décrivez l'article en quelques phrases"}),
+            'price': forms.NumberInput(attrs={'class': INPUT_CLASS, 'placeholder': '0.00'}),
+            'image': forms.FileInput(attrs={'class': INPUT_CLASS}),
+            'image_url': forms.URLInput(attrs={'class': INPUT_CLASS, 'placeholder': 'https://...'}),
+            'discount_percentage': forms.NumberInput(attrs={'class': INPUT_CLASS}),
+            'sizes': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'XS,S,M,L,XL'}),
         }

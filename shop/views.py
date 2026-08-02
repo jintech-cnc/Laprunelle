@@ -20,7 +20,7 @@ def home(request):
 @is_superuser
 def add_product(request):
     if request.method == 'POST':
-        form = ProductForm(request.POST)
+        form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save()
             messages.success(request, f'"{product.name}" a bien été publié dans la boutique.')
@@ -41,7 +41,7 @@ def manage_products(request):
 def edit_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
-        form = ProductForm(request.POST, instance=product)
+        form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             form.save()
             messages.success(request, f'"{product.name}" a bien été mis à jour.')
