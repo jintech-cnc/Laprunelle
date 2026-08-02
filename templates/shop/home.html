@@ -13,7 +13,7 @@
             categoryName: '{{ product.category.name|escapejs }}',
             price: {{ product.final_price }},
             oldPrice: {{ product.price }},
-            image: '{{ product.image_url }}',
+            image: '{% if product.image %}{{ product.image.url }}{% else %}{{ product.image_url }}{% endif %}',
             description: '{{ product.description|escapejs }}',
             isNew: {{ product.is_new|lower }},
             onSale: {{ product.is_on_sale|lower }},
