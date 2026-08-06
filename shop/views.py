@@ -19,7 +19,7 @@ def home(request):
             'categoryName': product.category.name,
             'price': float(product.final_price),
             'oldPrice': float(product.price),
-            'image': product.image.url if product.image else product.image_url,
+            'image': product.image_url,
             'description': product.description,
             'isNew': product.is_new,
             'onSale': product.is_on_sale,
