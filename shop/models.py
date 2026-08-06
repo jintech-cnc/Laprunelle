@@ -44,6 +44,16 @@ class Product(models.Model):
             self.slug = slug
         super().save(*args, **kwargs)
 
+        # Si une image est téléversée, on récupère son URL Cloudinary et on met à jour image_url
+        if self.image:
+            try:
+                cloudinary_url = self.image.url
+                if self.image_url != cloudinary_url:
+                    Product.objects.filter(pk=self.pk).update(image_url=cloudinary_url)
+                    self.image_url = cloudinary_url
+            except Exception:
+                pass
+
     @property
     def final_price(self):
         if self.is_on_sale:
