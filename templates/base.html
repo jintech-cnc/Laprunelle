@@ -30,7 +30,7 @@
         }
     </style>
 </head>
-<body class="bg-white text-gray-900" x-data="cartSystem()" x-cloak>
+<body class="bg-white text-gray-900" x-data="cartSystem()">
 
     <!-- Header / Navbar -->
     <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
@@ -127,7 +127,7 @@
     </main>
 
     <!-- Slide-over Cart Panel -->
-    <div x-show="cartOpen" class="relative z-[60]" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <div x-show="cartOpen" x-cloak class="relative z-[60]" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
         <div x-show="cartOpen" 
              x-transition:enter="ease-in-out duration-500" 
              x-transition:enter-start="opacity-0" 

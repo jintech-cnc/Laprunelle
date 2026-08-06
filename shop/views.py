@@ -9,11 +9,27 @@ is_superuser = user_passes_test(lambda u: u.is_superuser)
 
 def home(request):
     categories = Category.objects.all()
-    products = Product.objects.all().order_by('-created_at')
+    products_data = []
+    # Utilisation de select_related pour éviter le problème N+1 requêtes
+    for product in Product.objects.select_related('category').all().order_by('-created_at'):
+        products_data.append({
+            'id': product.id,
+            'name': product.name,
+            'category': product.category.slug,
+            'categoryName': product.category.name,
+            'price': float(product.final_price),
+            'oldPrice': float(product.price),
+            'image': product.image.url if product.image else product.image_url,
+            'description': product.description,
+            'isNew': product.is_new,
+            'onSale': product.is_on_sale,
+            'discount': product.discount_percentage,
+            'sizes': product.sizes.split(',')
+        })
     
     context = {
         'categories': categories,
-        'products': products,
+        'products': products_data,
     }
     return render(request, 'shop/home.html', context)
 

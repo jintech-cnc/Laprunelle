@@ -1,40 +1,23 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{{ products|json_script:"products-data" }}
+
 <div x-data="{ 
     activeCategory: 'all', 
     newOnly: false,
-    products: [
-        {% for product in products %}
-        {
-            id: {{ product.id }},
-            name: '{{ product.name|escapejs }}',
-            category: '{{ product.category.slug }}',
-            categoryName: '{{ product.category.name|escapejs }}',
-            price: {{ product.final_price }},
-            oldPrice: {{ product.price }},
-            image: '{% if product.image %}{{ product.image.url }}{% else %}{{ product.image_url }}{% endif %}',
-            description: '{{ product.description|escapejs }}',
-            isNew: {{ product.is_new|lower }},
-            onSale: {{ product.is_on_sale|lower }},
-            discount: {{ product.discount_percentage }},
-            sizes: '{{ product.sizes }}'.split(',')
-        }{% if not forloop.last %},{% endif %}
-        {% endfor %}
-    ],
+    loading: true,
+    products: JSON.parse(document.getElementById('products-data').textContent),
     get filteredProducts() {
         let list = this.products;
         if (this.activeCategory !== 'all') list = list.filter(p => p.category === this.activeCategory);
         if (this.newOnly) list = list.filter(p => p.isNew);
-        if (this.searchQuery && this.searchQuery.trim() !== '') {
-            const q = this.searchQuery.trim().toLowerCase();
-            list = list.filter(p => p.name.toLowerCase().includes(q) || p.categoryName.toLowerCase().includes(q));
-        }
         return list;
     },
     init() {
         const params = new URLSearchParams(window.location.search);
         if (params.get('filtre') === 'nouveautes') this.newOnly = true;
+        this.loading = false;
     }
 }" x-init="init()">
     <!-- Hero Section -->
@@ -90,8 +73,19 @@
             Aucun article ne correspond à votre recherche pour le moment.
         </p>
 
+        <!-- Skeleton Loading Grid -->
+        <div x-show="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+            <template x-for="i in [1, 2, 3]">
+                <div class="animate-pulse">
+                    <div class="aspect-[3/4] bg-gray-100 rounded-sm mb-4"></div>
+                    <div class="h-4 bg-gray-100 rounded w-1/2 mb-2"></div>
+                    <div class="h-4 bg-gray-100 rounded w-1/4"></div>
+                </div>
+            </template>
+        </div>
+
         <!-- Products Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+        <div x-show="!loading" x-cloak class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
             <template x-for="product in filteredProducts" :key="product.id">
                 <div class="group relative" 
                      x-show="true" 
@@ -101,7 +95,7 @@
                     <!-- Image Wrapper -->
                     <div class="relative aspect-[3/4] overflow-hidden bg-gray-100 rounded-sm cursor-pointer" 
                          @click="openProductModal(product)">
-                        <img :src="product.image" :alt="product.name" 
+                        <img :src="product.image" :alt="product.name" loading="lazy"
                              class="h-full w-full object-cover object-center transition duration-700 group-hover:scale-110">
                         
                         <!-- Badges -->
@@ -146,7 +140,7 @@
     </section>
 
     <!-- Detailed Product Modal -->
-    <div x-show="modalOpen" class="relative z-[70]" role="dialog" aria-modal="true">
+    <div x-show="modalOpen" x-cloak class="relative z-[70]" role="dialog" aria-modal="true">
         <div x-show="modalOpen" 
              x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
              x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
